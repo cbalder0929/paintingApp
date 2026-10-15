@@ -1,0 +1,146 @@
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+#app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 0 0 48px;
+    min-height: 48px;
+    padding: 0 12px;
+    border-bottom: 1px solid #444;
+    background-color: #252525;
+    color: #ffffff;
+}
+
+#header-menus,
+#header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-menu-placeholder,
+.header-action-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 52px;
+    height: 32px;
+    padding: 0 10px;
+    border-radius: 4px;
+    background-color: #333333;
+    font-size: 14px;
+}
+
+#app-main {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+}
+
+#tool-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 0 0 64px;
+    width: 64px;
+    padding: 8px;
+    gap: 8px;
+    border-right: 1px solid #444;
+    background-color: #252525;
+}
+
+.tool {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #3a3a3a;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.tool-group {
+    position: relative;
+}
+
+.tool-group-button {
+    position: relative;
+}
+
+.tool-group-expand {
+    position: absolute;
+
+    right: 3px;
+    bottom: 2px;
+
+    font-size: 8px;
+}
+
+.tool-group-popup {
+    display: none;
+
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 0;
+
+    padding: 6px;
+
+    gap: 6px;
+
+    background: #2b2b2b;
+    border: 1px solid #555;
+    border-radius: 6px;
+
+    z-index: 1000;
+}
+
+.tool-group-popup.open {
+    display: flex;
+}
+
+#workspace {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    background-color: #181818;
+}
+
+#pixi-container {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+#pixi-container canvas {
+    display: block;
+}

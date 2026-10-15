@@ -1,0 +1,48 @@
+<!doctype html>
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+
+        
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <link rel="icon" type="image/png" href="/favicon.png" />
+
+        <title>Painting App</title>
+        
+    </head>
+
+    <body>
+        <div id="app">
+            
+            <header id="app-header">
+                <div id="header-menus">
+                    <div class="header-menu-placeholder">File</div>
+                    <div class="header-menu-placeholder">Edit</div>
+                    <div class="header-menu-placeholder">View</div>
+                    <label for="stroke">Stroke</label>
+                    <input type="number" id="stroke" name="stroke" min="0" max="100" value="1">
+                </div>
+
+                <div id="header-actions">
+                    <button class="header-action-placeholder" title="Undo" id="undo"><i class="fa-solid fa-rotate-left"></i></button>
+                    <button class="header-action-placeholder" title="Redo" id="redo"><i class="fa-solid fa-rotate-right"></i></button>
+                </div>
+            </header>
+
+            <main id="app-main">
+                <aside id="tool-panel">
+
+                </aside>
+
+                <section id="workspace">
+                    <div id="pixi-container"></div>
+                </section>
+            </main>
+        </div>
+
+        <script type="module" src="/src/main.js"></script>
+        
+    </body>
+</html>
