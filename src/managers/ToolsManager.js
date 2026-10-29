@@ -21,10 +21,20 @@ class ToolsManager {
         tool.appendChild(toolIcon);
         
         tool.addEventListener('click', () => {
-           onClick(); 
+           onClick(tool);
         });
-        
+
         return tool;
+    }
+
+    // Highlights the given tool (and its group button, if it lives in a popup).
+    setActive(tool){
+        for (const active of this.ToolPanel.querySelectorAll(".active")) {
+            active.classList.remove("active");
+        }
+
+        tool.classList.add("active");
+        tool.closest(".tool-group")?.querySelector(".tool-group-button").classList.add("active");
     }
     
     getColorPicker(title){

@@ -87,6 +87,15 @@ body {
     cursor: pointer;
 }
 
+.tool.active {
+    background-color: #3b82f6;
+}
+
+.header-action-placeholder:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
 .tool-group {
     position: relative;
 }
