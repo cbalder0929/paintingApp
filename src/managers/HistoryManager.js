@@ -15,6 +15,12 @@ class HistoryManager {
         return this.undoStack.length > 0;
     }
 
+    clear() {
+        this.undoStack = [];
+        this.redoStack = [];
+        this.changed.invoke(this);
+    }
+
     get canRedo() {
         return this.redoStack.length > 0;
     }

@@ -3,6 +3,7 @@ import ToolsManager from "./managers/ToolsManager.js";
 import SceneManager from "./managers/SceneManager.js";
 import HistoryManager from "./managers/HistoryManager.js";
 import InteractionManager from "./managers/InteractionManager.js";
+import initMenus from "./managers/MenuManager.js";
 
 import "../style.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -16,6 +17,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 
     await app.init({
         background: "#aaaaaa",
+        backgroundAlpha: 0,
         resizeTo: container
     });
 
@@ -54,13 +56,25 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
         SceneManager.deleteSelection();
     }));
 
-    ToolsManager.addTool(ToolsManager.getTool("Group Tool",["fa-solid","fa-object-group"], () => {
+    const groupTool = ToolsManager.getTool("Group selected objects (Ctrl+G)",["fa-solid","fa-object-group"], () => {
         SceneManager.groupSelection();
-    }));
+    });
+    groupTool.id = "group-tool";
+    ToolsManager.addTool(groupTool);
 
-    ToolsManager.addTool(ToolsManager.getTool("Ungroup Tool",["fa-regular","fa-object-group"], () => {
+    const ungroupTool = ToolsManager.getTool("Ungroup selected groups (Ctrl+Shift+G)",["fa-solid","fa-object-ungroup"], () => {
         SceneManager.ungroupSelection();
-    }));
+    });
+    ungroupTool.id = "ungroup-tool";
+    ToolsManager.addTool(ungroupTool);
+
+    const updateGroupingTools = () => {
+        groupTool.disabled = SceneManager.selection.length < 2;
+        ungroupTool.disabled = !SceneManager.selection.some((obj) => obj.meta.kind === "group");
+    };
+    SceneManager.selectionChanged.addListener(updateGroupingTools);
+    updateGroupingTools();
+    selectTool.title = "Select: drag on empty canvas to select multiple objects; Shift to add";
 
     container.appendChild(app.canvas);
 
@@ -123,4 +137,5 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 
     HistoryManager.changed.addListener(updateHistoryButtons);
     updateHistoryButtons();
+    initMenus(app);
 })();

@@ -28,8 +28,9 @@ class InteractionManager {
 
         canvas.addEventListener("pointerdown", (e) => this.onPointerDown(e));
         canvas.addEventListener("pointermove", (e) => this.onPointerMove(e));
-        canvas.addEventListener("pointerup", () => this.onPointerUp());
-        canvas.addEventListener("pointercancel", () => this.onPointerUp());
+        canvas.addEventListener("pointerup", (e) => { this.onPointerMove(e); this.onPointerUp(); });
+        canvas.addEventListener("pointercancel", () => this.cancelDrag());
+        canvas.addEventListener("lostpointercapture", () => this.cancelDrag());
         window.addEventListener("keydown", (e) => this.onKeyDown(e));
 
         this.setTool(this.tool);
@@ -43,7 +44,7 @@ class InteractionManager {
     toPoint(e) {
         const rect = this.canvas.getBoundingClientRect();
 
-        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        return SceneManager.world.toLocal({ x: e.clientX - rect.left, y: e.clientY - rect.top });
     }
 
     onPointerDown(e) {
@@ -67,6 +68,11 @@ class InteractionManager {
         const hit = SceneManager.pick(point);
 
         if (this.tool === "select") {
+            if (!hit) {
+                this.drag = { type: "marquee", start: point,
+                    before: [...SceneManager.selection],
+                    initial: e.shiftKey ? [...SceneManager.selection] : [] };
+            }
             this.select(hit, e.shiftKey);
             return;
         }
@@ -112,7 +118,9 @@ class InteractionManager {
         const point = this.toPoint(e);
         const { type, start } = this.drag;
 
-        if (type === "draw") {
+        if (type === "marquee") {
+            SceneManager.selectInBox(start, point, this.drag.initial);
+        } else if (type === "draw") {
             SceneManager.setShapeBounds(this.drag.shape, start, point);
         } else if (type === "move") {
             SceneManager.translate(this.drag.entries, point.x - start.x, point.y - start.y);
@@ -131,7 +139,9 @@ class InteractionManager {
         const drag = this.drag;
         this.drag = null;
 
-        if (drag.type === "draw") {
+        if (drag.type === "marquee") {
+            SceneManager.setSelection([...SceneManager.selection]);
+        } else if (drag.type === "draw") {
             const { w, h } = drag.shape.meta;
 
             if (Math.hypot(w, h) < MIN_SHAPE_SIZE) {
@@ -144,8 +154,25 @@ class InteractionManager {
         }
     }
 
+    cancelDrag() {
+        if (!this.drag) return;
+        const drag = this.drag;
+        this.drag = null;
+        if (drag.type === "marquee") SceneManager.setSelection(drag.before);
+        else if (drag.type === "draw") SceneManager.discardShape(drag.shape);
+        else {
+            for (const { obj, state } of drag.entries) SceneManager.applyState(obj, state);
+            SceneManager.refreshOverlay();
+        }
+    }
+
     onKeyDown(e) {
-        if (this.drag || e.target.matches("input, textarea")) return;
+        if (this.drag && e.key === "Escape") {
+            this.cancelDrag();
+            e.preventDefault();
+            return;
+        }
+        if (e.defaultPrevented || this.drag || e.target.matches("input, textarea, [contenteditable]")) return;
 
         const modifier = e.ctrlKey || e.metaKey;
         const key = e.key.toLowerCase();

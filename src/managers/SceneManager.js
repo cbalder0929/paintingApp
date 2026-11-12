@@ -196,6 +196,25 @@ class SceneManager {
 
     // ---- Selection ----
 
+    selectInBox(from, to, initial = []) {
+        // Convert the marquee to screen space, matching object bounds at every zoom.
+        const a = this.world.toGlobal(from);
+        const b = this.world.toGlobal(to);
+        const x = Math.min(a.x, b.x);
+        const y = Math.min(a.y, b.y);
+        const right = Math.max(a.x, b.x);
+        const bottom = Math.max(a.y, b.y);
+        const inside = this.world.children.filter((obj) => {
+            const bounds = obj.getBounds().rectangle;
+            return bounds.x >= x && bounds.y >= y &&
+                bounds.x + bounds.width <= right && bounds.y + bounds.height <= bottom;
+        });
+        this.setSelection([...new Set([...initial, ...inside])]);
+        this.overlay.rect(x, y, right - x, bottom - y)
+            .fill({ color: SELECTION_COLOR, alpha: 0.12 })
+            .stroke({ width: 1, color: SELECTION_COLOR });
+    }
+
     setSelection(objs) {
         this.selection = objs;
         this.refreshOverlay();
@@ -248,7 +267,46 @@ class SceneManager {
             maxY = Math.max(maxY, b.y + b.height);
         }
 
-        return { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
+        return this.world.toLocal({ x: (minX + maxX) / 2, y: (minY + maxY) / 2 });
+    }
+
+    serialize(objects = this.world.children) {
+        const encode = (obj) => ({ meta: { ...obj.meta }, ...this.getState(obj),
+            ...(obj.meta.kind === "group" ? { children: obj.children.map(encode) } : {}) });
+        return objects.map(encode);
+    }
+
+    deserialize(records) {
+        let count = 0;
+        const decode = (record, depth = 0) => {
+            if (++count > 10000 || depth > 30 || !record || !record.meta) throw new Error("Invalid drawing.");
+            const { meta } = record;
+            if (!["group", "rectangle", "ellipse", "line", "star"].includes(meta.kind) ||
+                !["x", "y", "sx", "sy"].every((key) => Number.isFinite(record[key]) && Math.abs(record[key]) <= 1000000)) throw new Error("Invalid shape or transform.");
+            let obj;
+            if (meta.kind === "group") {
+                if (!Array.isArray(record.children) || !record.children.length) throw new Error("Invalid group.");
+                obj = new Container();
+                obj.meta = { kind: "group" };
+                for (const child of record.children) obj.addChild(decode(child, depth + 1));
+            } else {
+                if (!["w", "h", "dx", "dy", "fill", "stroke", "strokeWidth"].every((key) => Number.isFinite(meta[key]) && Math.abs(meta[key]) <= 0xffffff) || meta.w < 0 || meta.h < 0 || meta.strokeWidth < 0) throw new Error("Invalid shape properties.");
+                obj = new Graphics();
+                obj.meta = { ...meta };
+                this.drawShape(obj);
+            }
+            this.applyState(obj, record);
+            return obj;
+        };
+        if (!Array.isArray(records)) throw new Error("Invalid drawing.");
+        return records.map((record) => decode(record));
+    }
+
+    insert(objects) {
+        HistoryManager.execute({
+            redo: () => { objects.forEach((obj) => this.world.addChild(obj)); this.setSelection(objects); },
+            undo: () => { objects.forEach((obj) => this.world.removeChild(obj)); this.setSelection([]); }
+        });
     }
 
     // ---- Transforms ----

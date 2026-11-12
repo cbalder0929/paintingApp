@@ -11,6 +11,7 @@ class ToolsManager {
         let tool = document.createElement("button");
         tool.type = "button";
         tool.title = title;
+        tool.setAttribute("aria-label", title);
         tool.classList.add("tool");
         
         let toolIcon = document.createElement("i");
