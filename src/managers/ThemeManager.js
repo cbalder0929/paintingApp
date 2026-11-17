@@ -52,10 +52,12 @@ export default function initThemes() {
         radio.addEventListener("change", () => applyTheme(radio.value));
     });
 
-    openButton.addEventListener("click", () => {
+    const open = () => {
         dialog.showModal();
         dialog.querySelector('input[name="theme"]:checked')?.focus();
-    });
+    };
+
+    openButton.addEventListener("click", open);
 
     closeButton.addEventListener("click", () => dialog.close());
 
@@ -65,4 +67,7 @@ export default function initThemes() {
     });
 
     dialog.addEventListener("close", () => openButton.focus());
+
+    // Greet every visit with the theme picker.
+    open();
 }
