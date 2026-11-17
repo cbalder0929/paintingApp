@@ -1,3 +1,107 @@
+/* ---------- Theme tokens ----------
+   Every color in the UI comes from these variables. Each theme below
+   overrides them via <html data-theme="...">. "classic" is the default. */
+:root,
+:root[data-theme="classic"] {
+    --header-bg: #252525;
+    --panel-bg: #252525;
+    --text: #ffffff;
+    --text-muted: #bbbbbb;
+    --border: #444444;
+    --surface: #333333;
+    --surface-hover: #444444;
+    --tool-bg: #3a3a3a;
+    --accent: #3b82f6;
+    --accent-text: #ffffff;
+    --focus: #8cbfff;
+    --workspace-bg: #181818;
+    --canvas-bg: #aaaaaa;
+    --grid-line: #7776;
+    --menu-bg: #292929;
+    --menu-border: #666666;
+    --menu-hover: #365d88;
+    --emblem-bg: transparent;
+    --emblem-color: transparent;
+    --header-stripe: none;
+    --workspace-pattern: none;
+}
+
+/* Electric mouse: sunny yellow, black ear tips, red cheeks, brown back stripes. */
+:root[data-theme="pikachu"] {
+    --header-bg: linear-gradient(180deg, #ffe14d 0%, #f7c81e 100%);
+    --panel-bg: #f9d23a;
+    --text: #2a1d00;
+    --text-muted: #6b5410;
+    --border: #2a1d00;
+    --surface: #ffe680;
+    --surface-hover: #fff1b3;
+    --tool-bg: #ffe680;
+    --accent: #e3350d;
+    --accent-text: #ffffff;
+    --focus: #e3350d;
+    --workspace-bg: #fff3c4;
+    --canvas-bg: #fffdf2;
+    --grid-line: #d9b44a66;
+    --menu-bg: #fff6d1;
+    --menu-border: #2a1d00;
+    --menu-hover: #e3350d;
+    --emblem-bg: #e3350d;
+    --emblem-color: #ffe14d;
+    --header-stripe: repeating-linear-gradient(90deg, #8b5a2b 0 28px, transparent 28px 56px);
+    --workspace-pattern: radial-gradient(circle, #f2c94c55 2px, transparent 2.5px);
+}
+
+/* Shellfish tank: ocean blues, cream belly, brown shell, steel cannons. */
+:root[data-theme="blastoise"] {
+    --header-bg: linear-gradient(180deg, #3a7cc8 0%, #24579a 100%);
+    --panel-bg: #2b65ab;
+    --text: #ffffff;
+    --text-muted: #c8dcf2;
+    --border: #163b6b;
+    --surface: #3f86d4;
+    --surface-hover: #5d9ce2;
+    --tool-bg: #3f86d4;
+    --accent: #f1e2b0;
+    --accent-text: #3b2a10;
+    --focus: #f1e2b0;
+    --workspace-bg: #d7e8fa;
+    --canvas-bg: #f3f8ff;
+    --grid-line: #7aa6d666;
+    --menu-bg: #1f4e8c;
+    --menu-border: #9fb3c8;
+    --menu-hover: #5d9ce2;
+    --emblem-bg: #8b5a2b;
+    --emblem-color: #9fd3ff;
+    --header-stripe: linear-gradient(90deg, #8b5a2b, #a8743f 50%, #8b5a2b);
+    --workspace-pattern: radial-gradient(ellipse 12px 6px, #9cc4ec55 60%, transparent 62%);
+}
+
+/* Seed dinosaur: leafy teal-greens, a big pink bloom, fern leaves. */
+:root[data-theme="venusaur"] {
+    --header-bg: linear-gradient(180deg, #46a583 0%, #2e7a60 100%);
+    --panel-bg: #358a6c;
+    --text: #ffffff;
+    --text-muted: #cdeedd;
+    --border: #1d5642;
+    --surface: #4fb08d;
+    --surface-hover: #6cc6a4;
+    --tool-bg: #4fb08d;
+    --accent: #f06c8c;
+    --accent-text: #ffffff;
+    --focus: #ffb3c6;
+    --workspace-bg: #e1f3e7;
+    --canvas-bg: #f6fcf7;
+    --grid-line: #7dbf9866;
+    --menu-bg: #2e7a60;
+    --menu-border: #a6dcbf;
+    --menu-hover: #f06c8c;
+    --emblem-bg: #f06c8c;
+    --emblem-color: #2f9e44;
+    --header-stripe: linear-gradient(90deg, #2f9e44, #f06c8c 50%, #2f9e44);
+    --workspace-pattern: radial-gradient(circle, #8fd1a855 2px, transparent 2.5px);
+}
+
+/* ---------- Layout ---------- */
 html,
 body {
     width: 100%;
@@ -12,6 +116,19 @@ body {
 
 body {
     font-family: Arial, sans-serif;
+    background: var(--workspace-bg);
+    color: var(--text);
+}
+
+/* Smooth cross-fade when switching themes. */
+#app-header,
+#tool-panel,
+#workspace,
+#pixi-container,
+#status-bar,
+.tool,
+.header-action-placeholder {
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
 
 #app {
@@ -22,15 +139,28 @@ body {
 }
 
 #app-header {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex: 0 0 48px;
     min-height: 48px;
     padding: 0 12px;
-    border-bottom: 1px solid #444;
-    background-color: #252525;
-    color: #ffffff;
+    border-bottom: 1px solid var(--border);
+    background: var(--header-bg);
+    color: var(--text);
+}
+
+/* Decorative accent stripe along the bottom of the header (themes only). */
+#app-header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 4px;
+    background: var(--header-stripe);
+    pointer-events: none;
 }
 
 #header-menus,
@@ -38,6 +168,25 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+/* Small round badge showing the theme's mascot icon. */
+#theme-emblem {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    margin-right: 4px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    background: var(--emblem-bg);
+    color: var(--emblem-color);
+    font-size: 15px;
+}
+
+:root:not([data-theme="classic"]) #theme-emblem {
+    display: flex;
 }
 
 .header-menu-placeholder,
@@ -48,9 +197,42 @@ body {
     min-width: 52px;
     height: 32px;
     padding: 0 10px;
+    border: 1px solid var(--border);
     border-radius: 4px;
-    background-color: #333333;
+    background-color: var(--surface);
+    color: var(--text);
     font-size: 14px;
+}
+
+button.header-action-placeholder {
+    cursor: pointer;
+}
+
+button.header-action-placeholder:hover:not(:disabled) {
+    background-color: var(--surface-hover);
+}
+
+.header-action-placeholder:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+}
+
+#settings-button i {
+    transition: transform 0.4s ease;
+}
+
+#settings-button:hover i {
+    transform: rotate(90deg);
+}
+
+#stroke {
+    width: 60px;
+    height: 28px;
+    padding: 0 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--text);
 }
 
 #app-main {
@@ -68,8 +250,8 @@ body {
     width: 64px;
     padding: 8px;
     gap: 8px;
-    border-right: 1px solid #444;
-    background-color: #252525;
+    border-right: 1px solid var(--border);
+    background: var(--panel-bg);
 }
 
 .tool {
@@ -77,22 +259,30 @@ body {
     height: 44px;
     min-width: 44px;
     min-height: 44px;
-    
+
     display: flex;
     align-items: center;
     justify-content: center;
 
-    background-color: #3a3a3a;
+    border: 1px solid var(--border);
+    background-color: var(--tool-bg);
+    color: var(--text);
     border-radius: 6px;
     cursor: pointer;
 }
 
-.tool.active {
-    background-color: #3b82f6;
+.tool:hover:not(:disabled) {
+    background-color: var(--surface-hover);
+}
+
+.tool.active,
+.tool.active:hover {
+    background-color: var(--accent);
+    color: var(--accent-text);
 }
 
 .tool:disabled { opacity: 0.4; cursor: default; }
-.tool:focus-visible { outline: 2px solid #8cbfff; outline-offset: 2px; }
+.tool:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
 .header-action-placeholder:disabled {
     opacity: 0.4;
@@ -127,8 +317,8 @@ body {
 
     gap: 6px;
 
-    background: #2b2b2b;
-    border: 1px solid #555;
+    background: var(--menu-bg);
+    border: 1px solid var(--menu-border);
     border-radius: 6px;
 
     z-index: 1000;
@@ -138,20 +328,40 @@ body {
     display: flex;
 }
 
+/* Car picker: a 4-column grid of model previews. */
+.tool-group-popup.car-popup.open {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    box-shadow: 0 6px 20px #0005;
+}
+
+.tool.car-tool {
+    width: 84px;
+    height: 48px;
+    padding: 5px 6px;
+}
+
+.tool.car-tool svg {
+    width: 100%;
+    height: 100%;
+}
+
 #workspace {
     position: relative;
     flex: 1 1 auto;
     min-width: 0;
     min-height: 0;
     overflow: hidden;
-    background-color: #181818;
+    background-color: var(--workspace-bg);
 }
 
 #pixi-container {
     position: absolute;
     inset: 0;
     overflow: hidden;
-    background-color: #aaa;
+    background-color: var(--canvas-bg);
+    background-image: var(--workspace-pattern);
+    background-size: 28px 28px;
 }
 
 #pixi-container canvas {
@@ -162,14 +372,203 @@ body {
 .app-menu { position: relative; font-size: 14px; }
 .app-menu summary { cursor: pointer; list-style: none; padding: 8px 12px; border-radius: 4px; }
 .app-menu summary::-webkit-details-marker { display: none; }
-.app-menu[open] summary, .app-menu summary:hover { background: #444; }
-.menu-popup { position: absolute; top: 36px; left: 0; z-index: 2000; width: 260px; padding: 5px; color: #fff; background: #292929; border: 1px solid #666; border-radius: 5px; box-shadow: 0 6px 20px #0006; }
+.app-menu[open] summary, .app-menu summary:hover { background: var(--surface-hover); }
+.menu-popup { position: absolute; top: 36px; left: 0; z-index: 2000; width: 260px; padding: 5px; color: var(--text); background: var(--menu-bg); border: 1px solid var(--menu-border); border-radius: 5px; box-shadow: 0 6px 20px #0006; }
+:root[data-theme="pikachu"] .menu-popup { color: #2a1d00; }
 .menu-popup button { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 8px 10px; border: 0; border-radius: 3px; color: inherit; background: transparent; text-align: left; cursor: pointer; }
-.menu-popup button:hover:not(:disabled), .menu-popup button:focus-visible { background: #365d88; outline: 2px solid #8cbfff; }
+.menu-popup button:hover:not(:disabled), .menu-popup button:focus-visible { background: var(--menu-hover); color: #fff; outline: 2px solid var(--focus); }
 .menu-popup button:disabled { opacity: .4; cursor: default; }
 .menu-popup button[aria-checked='true'] span::before { content: '✓ '; }
-.menu-popup kbd { color: #bbb; font: 11px Arial, sans-serif; }
-.menu-popup hr { border: 0; border-top: 1px solid #555; margin: 4px; }
-#status-bar { flex: 0 0 26px; padding: 5px 12px; background: #252525; color: #ddd; font-size: 12px; }
-#pixi-container.show-grid { background-image: linear-gradient(#7776 1px, transparent 1px), linear-gradient(90deg, #7776 1px, transparent 1px); background-size: 20px 20px; }
-@media (max-width: 540px) { #header-menus { gap: 0; } .app-menu summary { padding: 8px; } #stroke { width: 45px; } .menu-popup { width: 220px; } #status-bar { font-size: 10px; } }
+.menu-popup kbd { color: var(--text-muted); font: 11px Arial, sans-serif; }
+.menu-popup button:hover:not(:disabled) kbd, .menu-popup button:focus-visible kbd { color: inherit; opacity: .8; }
+.menu-popup hr { border: 0; border-top: 1px solid var(--menu-border); margin: 4px; opacity: .5; }
+#status-bar { flex: 0 0 26px; padding: 5px 12px; border-top: 1px solid var(--border); background: var(--panel-bg); color: var(--text); font-size: 12px; }
+#pixi-container.show-grid { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px); background-size: 20px 20px; }
+
+/* ---------- Settings dialog ---------- */
+#settings-dialog {
+    width: min(560px, calc(100vw - 32px));
+    max-height: calc(100vh - 32px);
+    padding: 0;
+    border: 2px solid var(--menu-border);
+    border-radius: 12px;
+    background: var(--menu-bg);
+    color: var(--text);
+    box-shadow: 0 18px 50px #0008;
+}
+
+:root[data-theme="pikachu"] #settings-dialog { color: #2a1d00; }
+
+#settings-dialog::backdrop {
+    background: #0008;
+    backdrop-filter: blur(2px);
+}
+
+#settings-dialog[open] {
+    animation: settings-pop 0.18s ease-out;
+}
+
+@keyframes settings-pop {
+    from { opacity: 0; transform: scale(0.96) translateY(6px); }
+    to { opacity: 1; transform: none; }
+}
+
+.settings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--menu-border);
+}
+
+.settings-header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.settings-close {
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.settings-close:hover { background: var(--surface-hover); }
+.settings-close:focus-visible { outline: 2px solid var(--focus); }
+
+.settings-body {
+    padding: 16px 18px 20px;
+}
+
+.settings-body fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.settings-body legend {
+    margin-bottom: 10px;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.theme-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.theme-option {
+    position: relative;
+    display: block;
+    cursor: pointer;
+}
+
+.theme-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.theme-card {
+    display: block;
+    overflow: hidden;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    background: #ffffff14;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.theme-option:hover .theme-card {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px #0004;
+}
+
+.theme-option input:checked + .theme-card {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent);
+}
+
+.theme-option input:focus-visible + .theme-card {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+}
+
+/* Mini mock-up of the app in each theme's colors. */
+.theme-preview {
+    position: relative;
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    grid-template-rows: 14px 1fr;
+    height: 78px;
+    background: var(--p-canvas);
+}
+
+.theme-preview::before {
+    content: "";
+    grid-column: 1 / -1;
+    background: var(--p-header);
+    border-bottom: 3px solid var(--p-stripe);
+}
+
+.theme-preview::after {
+    content: "";
+    background: var(--p-panel);
+    background-image: linear-gradient(var(--p-accent) 0 0);
+    background-size: 10px 10px;
+    background-position: 4px 6px;
+    background-repeat: no-repeat;
+}
+
+.theme-preview i {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--p-emblem-bg);
+    color: var(--p-emblem);
+    font-size: 17px;
+    box-shadow: 0 2px 6px #0003;
+}
+
+.theme-label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 10px 10px;
+}
+
+.theme-label strong { font-size: 14px; }
+.theme-label small { font-size: 12px; opacity: 0.75; }
+
+.theme-option[data-preview="classic"]   { --p-header: #252525; --p-panel: #2e2e2e; --p-canvas: #aaaaaa; --p-accent: #3b82f6; --p-stripe: #252525; --p-emblem-bg: #3a3a3a; --p-emblem: #ffffff; }
+.theme-option[data-preview="pikachu"]   { --p-header: #f7c81e; --p-panel: #f9d23a; --p-canvas: #fffdf2; --p-accent: #e3350d; --p-stripe: #8b5a2b; --p-emblem-bg: #e3350d; --p-emblem: #ffe14d; }
+.theme-option[data-preview="blastoise"] { --p-header: #2b65ab; --p-panel: #3f86d4; --p-canvas: #f3f8ff; --p-accent: #f1e2b0; --p-stripe: #8b5a2b; --p-emblem-bg: #8b5a2b; --p-emblem: #9fd3ff; }
+.theme-option[data-preview="venusaur"]  { --p-header: #2e7a60; --p-panel: #4fb08d; --p-canvas: #f6fcf7; --p-accent: #f06c8c; --p-stripe: #2f9e44; --p-emblem-bg: #f06c8c; --p-emblem: #2f9e44; }
+
+@media (max-width: 540px) {
+    #header-menus { gap: 0; }
+    .app-menu summary { padding: 8px; }
+    #stroke { width: 45px; }
+    .menu-popup { width: 220px; }
+    #status-bar { font-size: 10px; }
+    #theme-emblem { display: none !important; }
+    .theme-options { grid-template-columns: 1fr; }
+    .theme-preview { height: 56px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+}

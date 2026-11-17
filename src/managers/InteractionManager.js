@@ -1,7 +1,8 @@
 import HistoryManager from "./HistoryManager.js";
 import SceneManager from "./SceneManager.js";
 
-const SHAPE_TOOLS = ["ellipse", "rectangle", "line", "star"];
+const SHAPE_TOOLS = ["ellipse", "rectangle", "line", "star", "car"];
+const CAR_CLICK_WIDTH = 240; // size of a car placed with a click instead of a drag
 const MIN_SHAPE_SIZE = 3;
 const MIN_SCALE_FACTOR = 0.05;
 const MAX_SCALE_FACTOR = 50;
@@ -18,6 +19,7 @@ class InteractionManager {
     constructor() {
         this.canvas = null;
         this.tool = "select";
+        this.toolOptions = {};
         this.drag = null;
         this.getStyle = () => ({});
     }
@@ -36,8 +38,10 @@ class InteractionManager {
         this.setTool(this.tool);
     }
 
-    setTool(tool) {
+    // `options` are extra shape properties for the tool, e.g. { variant: "sedan" } for cars.
+    setTool(tool, options = {}) {
         this.tool = tool;
+        this.toolOptions = options;
         this.canvas.style.cursor = SHAPE_TOOLS.includes(tool) ? "crosshair" : CURSORS[tool];
     }
 
@@ -60,7 +64,7 @@ class InteractionManager {
             this.drag = {
                 type: "draw",
                 start: point,
-                shape: SceneManager.createShape(this.tool, this.getStyle())
+                shape: SceneManager.createShape(this.tool, { ...this.getStyle(), ...this.toolOptions })
             };
             return;
         }
@@ -142,9 +146,13 @@ class InteractionManager {
         if (drag.type === "marquee") {
             SceneManager.setSelection([...SceneManager.selection]);
         } else if (drag.type === "draw") {
-            const { w, h } = drag.shape.meta;
+            const { kind, w, h } = drag.shape.meta;
 
-            if (Math.hypot(w, h) < MIN_SHAPE_SIZE) {
+            if (Math.hypot(w, h) < MIN_SHAPE_SIZE && kind === "car") {
+                // A click drops a ready-sized car.
+                SceneManager.placeCar(drag.shape, drag.start, CAR_CLICK_WIDTH);
+                SceneManager.commitShape(drag.shape);
+            } else if (Math.hypot(w, h) < MIN_SHAPE_SIZE) {
                 SceneManager.discardShape(drag.shape);
             } else {
                 SceneManager.commitShape(drag.shape);

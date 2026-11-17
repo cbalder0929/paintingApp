@@ -4,11 +4,15 @@ import SceneManager from "./managers/SceneManager.js";
 import HistoryManager from "./managers/HistoryManager.js";
 import InteractionManager from "./managers/InteractionManager.js";
 import initMenus from "./managers/MenuManager.js";
+import initThemes from "./managers/ThemeManager.js";
+import { CARS, carThumbnail } from "./shapes/cars.js";
 
 import "../style.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 
 (async () => {
+    initThemes();
+
     // Create a new application
     const app = new Application();
 
@@ -24,8 +28,8 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
     SceneManager.init(app);
 
     // Makes `name` the active drawing/editing tool and highlights its button.
-    const useTool = (name, tool) => {
-        InteractionManager.setTool(name);
+    const useTool = (name, tool, options) => {
+        InteractionManager.setTool(name, options);
         ToolsManager.setActive(tool);
     };
 
@@ -35,6 +39,18 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
         ToolsManager.getTool("Line",["fa-solid","fa-lines-leaning"], (tool) => useTool("line", tool)),
         ToolsManager.getTool("Star",["fa-regular","fa-star"], (tool) => useTool("star", tool))
     ]);
+
+    // Car polygons (from carPolygon.svg): pick a model, then drag or click on the canvas.
+    const carTools = CARS.map((car) => {
+        const tool = ToolsManager.getTool(`${car.name}: drag to size, click to drop`, [], (button) => useTool("car", button, { variant: car.id }));
+
+        tool.classList.add("car-tool");
+        tool.replaceChildren(carThumbnail(car));
+
+        return tool;
+    });
+    const carGroup = ToolsManager.addToolGroup("Cars", ["fa-solid","fa-car-side"], carTools);
+    carGroup.querySelector(".tool-group-popup").classList.add("car-popup");
 
     let fillColorPicker = ToolsManager.getColorPicker("Fill Color");
     let strokeColorPicker = ToolsManager.getColorPicker("Stroke Color");
