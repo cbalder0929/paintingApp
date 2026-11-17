@@ -201,7 +201,7 @@ export default function initMenus(app) {
     }
     document.addEventListener('pointerdown', (event) => { if (!event.target.closest('.app-menu')) close(); });
     window.addEventListener('keydown', (event) => {
-        if (event.target.closest('input, textarea, [contenteditable]')) return;
+        if (event.target.closest('input, textarea, [contenteditable], dialog')) return;
         if (event.key === 'Escape' && host.querySelector('details[open]')) { close(); event.preventDefault(); return; }
         let key = event.key.toLowerCase();
         if (key === '=') key = '+';

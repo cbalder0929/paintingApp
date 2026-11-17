@@ -2,6 +2,7 @@ import { Container, Graphics } from "pixi.js";
 import { Event } from "../Event.js";
 import HistoryManager from "./HistoryManager.js";
 import Utils from "./Utils.js";
+import { getCar } from "../shapes/cars.js";
 
 const SELECTION_COLOR = 0x3b82f6;
 const HIT_TOLERANCE = 5;
@@ -69,14 +70,62 @@ class SceneManager {
     // Fits the shape to the box spanned by two points and redraws it.
     setShapeBounds(shape, from, to) {
         const d = shape.meta;
+        let dx = to.x - from.x;
+        let dy = to.y - from.y;
 
-        shape.position.set((from.x + to.x) / 2, (from.y + to.y) / 2);
-        d.dx = to.x - from.x;
-        d.dy = to.y - from.y;
-        d.w = Math.abs(d.dx);
-        d.h = Math.abs(d.dy);
+        // Cars keep their proportions; dragging leftwards mirrors them to face left.
+        if (d.kind === "car") {
+            const { aspect } = getCar(d.variant);
+            const width = Math.max(Math.abs(dx), Math.abs(dy) * aspect);
+
+            dx = (dx < 0 ? -1 : 1) * width;
+            dy = (dy < 0 ? -1 : 1) * (width / aspect);
+        }
+
+        shape.position.set(from.x + dx / 2, from.y + dy / 2);
+        d.dx = dx;
+        d.dy = dy;
+        d.w = Math.abs(dx);
+        d.h = Math.abs(dy);
 
         this.drawShape(shape);
+    }
+
+    // Drops a car of the given width centred on a point (used for a plain click).
+    placeCar(shape, center, width) {
+        const height = width / getCar(shape.meta.variant).aspect;
+
+        this.setShapeBounds(shape,
+            { x: center.x - width / 2, y: center.y - height / 2 },
+            { x: center.x + width / 2, y: center.y + height / 2 });
+    }
+
+    // Maps a car's source coordinates into the shape's local, centred space.
+    carTransform(meta) {
+        const car = getCar(meta.variant);
+
+        return { car, sx: meta.dx / car.width, sy: meta.h / car.height };
+    }
+
+    drawCar(shape) {
+        const { fill, stroke } = shape.meta;
+        const { car, sx, sy } = this.carTransform(shape.meta);
+        const map = (points) => points.map((v, i) => (i % 2 === 0
+            ? (v - car.width / 2) * sx
+            : (v - car.height / 2) * sy));
+
+        // Body colour first, then the line art on top with its holes cut out.
+        for (const points of car.silhouettes) shape.poly(map(points));
+        shape.fill(fill);
+
+        for (const ink of car.inks) {
+            shape.poly(map(ink.points)).fill(stroke);
+
+            if (ink.holes.length) {
+                for (const hole of ink.holes) shape.poly(map(hole));
+                shape.cut();
+            }
+        }
     }
 
     // Shapes are drawn around their own origin so scaling keeps them centred.
@@ -84,6 +133,11 @@ class SceneManager {
         const { kind, w, h, dx, dy, fill, stroke, strokeWidth } = shape.meta;
 
         shape.clear();
+
+        if (kind === "car") {
+            if (w >= 1 && h >= 1) this.drawCar(shape);
+            return;
+        }
 
         if (kind === "line") {
             shape
@@ -189,6 +243,14 @@ class SceneManager {
 
                 return (p.x / rx) ** 2 + (p.y / ry) ** 2 <= 1;
             }
+            case "car": {
+                if (w < 1 || h < 1) return false;
+
+                const { car, sx, sy } = this.carTransform(meta);
+                const source = { x: p.x / sx + car.width / 2, y: p.y / sy + car.height / 2 };
+
+                return car.silhouettes.some((points) => pointInPolygon(source, points));
+            }
             default:
                 return pointInPolygon(p, this.starPoints(w, h));
         }
@@ -281,7 +343,8 @@ class SceneManager {
         const decode = (record, depth = 0) => {
             if (++count > 10000 || depth > 30 || !record || !record.meta) throw new Error("Invalid drawing.");
             const { meta } = record;
-            if (!["group", "rectangle", "ellipse", "line", "star"].includes(meta.kind) ||
+            if (!["group", "rectangle", "ellipse", "line", "star", "car"].includes(meta.kind) ||
+                (meta.kind === "car" && (typeof meta.variant !== "string" || !getCar(meta.variant))) ||
                 !["x", "y", "sx", "sy"].every((key) => Number.isFinite(record[key]) && Math.abs(record[key]) <= 1000000)) throw new Error("Invalid shape or transform.");
             let obj;
             if (meta.kind === "group") {

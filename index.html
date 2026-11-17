@@ -4,20 +4,31 @@
     <head>
         <meta charset="UTF-8" />
 
-        
+
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
         <link rel="icon" type="image/png" href="/favicon.png" />
 
         <title>Painting App</title>
-        
+
+        <!-- Apply the saved theme before first paint so there is no flash of the default colors. -->
+        <script>
+            try {
+                const theme = localStorage.getItem("painting-app-theme");
+                if (["classic", "pikachu", "blastoise", "venusaur"].includes(theme)) {
+                    document.documentElement.dataset.theme = theme;
+                }
+            } catch (error) { /* storage unavailable: keep the default theme */ }
+        </script>
+
     </head>
 
     <body>
         <div id="app">
-            
+
             <header id="app-header">
                 <div id="header-menus">
+                    <span id="theme-emblem" aria-hidden="true"><i class="fa-solid fa-bolt"></i></span>
                     <div class="header-menu-placeholder">File</div>
                     <div class="header-menu-placeholder">Edit</div>
                     <div class="header-menu-placeholder">View</div>
@@ -28,6 +39,7 @@
                 <div id="header-actions">
                     <button class="header-action-placeholder" title="Undo" id="undo"><i class="fa-solid fa-rotate-left"></i></button>
                     <button class="header-action-placeholder" title="Redo" id="redo"><i class="fa-solid fa-rotate-right"></i></button>
+                    <button class="header-action-placeholder" title="Settings" aria-label="Settings" aria-haspopup="dialog" id="settings-button"><i class="fa-solid fa-gear"></i></button>
                 </div>
             </header>
 
@@ -42,7 +54,49 @@
             </main>
         </div>
 
+        <dialog id="settings-dialog" aria-labelledby="settings-title">
+            <div class="settings-header">
+                <h2 id="settings-title">Settings</h2>
+                <button type="button" class="settings-close" aria-label="Close settings"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form class="settings-body" method="dialog">
+                <fieldset>
+                    <legend>Theme</legend>
+                    <div class="theme-options">
+                        <label class="theme-option" data-preview="classic">
+                            <input type="radio" name="theme" value="classic">
+                            <span class="theme-card">
+                                <span class="theme-preview"><i class="fa-solid fa-palette"></i></span>
+                                <span class="theme-label"><strong>Classic</strong><small>The original dark studio</small></span>
+                            </span>
+                        </label>
+                        <label class="theme-option" data-preview="pikachu">
+                            <input type="radio" name="theme" value="pikachu">
+                            <span class="theme-card">
+                                <span class="theme-preview"><i class="fa-solid fa-bolt"></i></span>
+                                <span class="theme-label"><strong>Pikachu</strong><small>Electric yellow with red cheeks</small></span>
+                            </span>
+                        </label>
+                        <label class="theme-option" data-preview="blastoise">
+                            <input type="radio" name="theme" value="blastoise">
+                            <span class="theme-card">
+                                <span class="theme-preview"><i class="fa-solid fa-droplet"></i></span>
+                                <span class="theme-label"><strong>Blastoise</strong><small>Ocean blue with a sturdy shell</small></span>
+                            </span>
+                        </label>
+                        <label class="theme-option" data-preview="venusaur">
+                            <input type="radio" name="theme" value="venusaur">
+                            <span class="theme-card">
+                                <span class="theme-preview"><i class="fa-solid fa-leaf"></i></span>
+                                <span class="theme-label"><strong>Venusaur</strong><small>Leafy green with a pink bloom</small></span>
+                            </span>
+                        </label>
+                    </div>
+                </fieldset>
+            </form>
+        </dialog>
+
         <script type="module" src="/src/main.js"></script>
-        
+
     </body>
 </html>

@@ -127,7 +127,7 @@ class ToolsManager {
 
         this.ToolPanel.appendChild(group);
 
-        //return group;
+        return group;
     }
 
 }
